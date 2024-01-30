@@ -1,0 +1,7 @@
+
+[linux]
+    [linux.deb]
+        update_cmd = "sudo apt update && sudp apt upgrade && sudo apt autoremove && sudo apt autoclean"
+
+[apps]
+vim = "vim"
