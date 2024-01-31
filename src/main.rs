@@ -1,22 +1,46 @@
-use clap::Parser;
+use ratatui::{
+  prelude::{CrosstermBackend, Terminal},
+  widgets::Paragraph,
+};
 
-/// Simple program to greet a person
-#[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-struct Args {
-    /// Name of the person to greet
-    #[arg(short, long)]
-    name: String,
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+  // startup: Enable raw mode for the terminal, giving us fine control over user input
+  crossterm::terminal::enable_raw_mode()?;
+  crossterm::execute!(std::io::stderr(), crossterm::terminal::EnterAlternateScreen)?;
 
-    /// Number of times to greet
-    #[arg(short, long, default_value_t = 1)]
-    count: u8,
-}
+  // Initialize the terminal backend using crossterm
+  let mut terminal = Terminal::new(CrosstermBackend::new(std::io::stderr()))?;
 
-fn main() {
-    let args = Args::parse();
+  // Define our counter variable
+  // This is the state of our application
+  let mut counter = 0;
 
-    for x in 0..args.count {
-        println!("Hello {} - {}!", args.name, x)
+  // Main application loop
+  loop {
+    // Render the UI
+    terminal.draw(|f| {
+      f.render_widget(Paragraph::new(format!("Counter: {counter}")), f.size());
+    })?;
+
+    // Check for user input every 250 milliseconds
+    if crossterm::event::poll(std::time::Duration::from_millis(250))? {
+      // If a key event occurs, handle it
+      if let crossterm::event::Event::Key(key) = crossterm::event::read()? {
+        if key.kind == crossterm::event::KeyEventKind::Press {
+          match key.code {
+            crossterm::event::KeyCode::Char('j') => counter += 1,
+            crossterm::event::KeyCode::Char('k') => counter -= 1,
+            crossterm::event::KeyCode::Char('q') => break,
+            _ => {},
+          }
+        }
+      }
     }
+  }
+
+  // shutdown down: reset terminal back to original state
+  crossterm::execute!(std::io::stderr(), crossterm::terminal::LeaveAlternateScreen)?;
+  crossterm::terminal::disable_raw_mode()?;
+
+  Ok(())
 }
