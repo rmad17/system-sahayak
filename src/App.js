@@ -5,7 +5,6 @@ pub struct App {
     pub current_screen: CurrentScreen, // the current screen the user is looking at, and will later determine what is rendered.
     pub currently_editing: Option<CurrentlyEditing>, // the optional state containing which of the key or value pair the user is editing. It is an option, because when the user is not directly editing a key-value pair, this will be set to `None`.
 }
-
     // --snip--
     pub fn save_key_value(&mut self) {
         self.pairs
