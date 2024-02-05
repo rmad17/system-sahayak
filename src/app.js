@@ -1,18 +1,22 @@
-struct App<'a> {
+
+use anyhow::{Context, Result};
+
+
+struct App {
     state: TableState,
     items: Vec<Vec<&'a str>>,
 }
 
-impl<'a> App<'a> {
-    fn new() -> App<'a> {
-        App {
+impl App {
+    fn new() -> Result<Self> {
+        Ok(Self {
             state: TableState::default(),
             items: vec![
                 vec!["system"],
                 vec!["vim"],
                 vec!["omz"],
             ],
-        }
+        })
     }
     pub fn next(&mut self) {
         let i = match self.state.selected() {
