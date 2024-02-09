@@ -99,15 +99,18 @@ fn ui(f: &mut Frame, app: &mut App) {
         .constraints([Constraint::Percentage(100)])
         .split(f.size());
 
-    let selected_style = Style::default().add_modifier(Modifier::REVERSED);
-    let normal_style = Style::default().bg(Color::Rgb(252, 138, 25));
-    let header_cells = ["Header1", "Header2", "Header3"]
-        .iter()
-        .map(|h| Cell::from(*h).style(Style::default().fg(Color::Black)));
-    let header = Row::new(header_cells)
-        .style(normal_style)
-        .height(1)
-        .bottom_margin(1);
+    let selected_style = Style::default()
+        .bg(Color::Rgb(252, 138, 25))
+        .fg(Color::Black);
+    // .add_modifier(Modifier::REVERSED);
+    // let normal_style = Style::default().bg(Color::Rgb(252, 138, 25));
+    // let header_cells = ["Header1", "Header2", "Header3"]
+    //     .iter()
+    //     .map(|h| Cell::from(*h).style(Style::default().fg(Color::Black)));
+    // let header = Row::new(header_cells)
+    //     .style(normal_style)
+    //     .height(1)
+    //     .bottom_margin(1);
     let rows = app.items.iter().map(|item| {
         let height = item
             .iter()
@@ -116,7 +119,7 @@ fn ui(f: &mut Frame, app: &mut App) {
             .unwrap_or(0)
             + 1;
         let cells = item.iter().map(|c| Cell::from(*c));
-        Row::new(cells).height(height as u16).bottom_margin(1)
+        Row::new(cells).height(height as u16) //.bottom_margin(1)
     });
     let t = Table::new(
         rows,
@@ -126,9 +129,9 @@ fn ui(f: &mut Frame, app: &mut App) {
             Constraint::Min(10),
         ],
     )
-    .header(header)
+    // .header(header)
     .block(Block::default().borders(Borders::ALL).title("Table"))
     .highlight_style(selected_style)
-    .highlight_symbol(">> ");
+    .highlight_symbol("-> ");
     f.render_stateful_widget(t, rects[0], &mut app.state);
 }
