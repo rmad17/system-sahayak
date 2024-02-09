@@ -17,11 +17,7 @@ impl<'a> App<'a> {
     fn new() -> App<'a> {
         App {
             state: TableState::default(),
-            items: vec![
-                vec!["system"],
-                vec!["vim"],
-                vec!["omz"],
-            ],
+            items: vec![vec!["system"], vec!["vim"], vec!["omz"]],
         }
     }
     pub fn next(&mut self) {
@@ -104,10 +100,10 @@ fn ui(f: &mut Frame, app: &mut App) {
         .split(f.size());
 
     let selected_style = Style::default().add_modifier(Modifier::REVERSED);
-    let normal_style = Style::default().bg(Color::Blue);
+    let normal_style = Style::default().bg(Color::Rgb(252, 138, 25));
     let header_cells = ["Header1", "Header2", "Header3"]
         .iter()
-        .map(|h| Cell::from(*h).style(Style::default().fg(Color::Red)));
+        .map(|h| Cell::from(*h).style(Style::default().fg(Color::Black)));
     let header = Row::new(header_cells)
         .style(normal_style)
         .height(1)
