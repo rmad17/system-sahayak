@@ -1,3 +1,4 @@
+use std::process::Command;
 use std::{error::Error, io};
 
 use crossterm::{
@@ -47,6 +48,26 @@ impl<'a> App<'a> {
         };
         self.state.select(Some(i));
     }
+    pub fn select(&mut self) {
+        let output = if cfg!(target_os = "windows") {
+            print!("A");
+            Command::new("cmd")
+                .args(["/C", "echo hello"])
+                .output()
+                .expect("failed to execute process")
+        } else {
+            print!("B");
+            Command::new("sh")
+                .output()
+                .expect("failed to execute process")
+        };
+        let output = Command::new("pwd")
+            .output()
+            .expect("failed to execute process");
+        let hello = output.stdout;
+        // print!("{}", _hello);
+        println!("{:?}", hello);
+    }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -84,6 +105,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
             if key.kind == KeyEventKind::Press {
                 match key.code {
                     KeyCode::Char('q') => return Ok(()),
+                    KeyCode::Enter => app.select(),
                     KeyCode::Down | KeyCode::Char('j') => app.next(),
                     KeyCode::Up | KeyCode::Char('k') => app.previous(),
                     _ => {}
