@@ -80,7 +80,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
     loop {
         terminal.draw(|f| ui(f, &mut app))?;
-
         if let Event::Key(key) = event::read()? {
             if key.kind == KeyEventKind::Press {
                 match key.code {
@@ -98,6 +97,10 @@ fn ui(f: &mut Frame, app: &mut App) {
     let rects = Layout::default()
         .constraints([Constraint::Percentage(100)])
         .split(f.size());
+
+    let default_style = Style::default()
+        .bg(Color::Rgb(246, 250, 142))
+        .fg(Color::Black);
 
     let selected_style = Style::default()
         .bg(Color::Rgb(252, 138, 25))
@@ -119,7 +122,7 @@ fn ui(f: &mut Frame, app: &mut App) {
             .unwrap_or(0)
             + 1;
         let cells = item.iter().map(|c| Cell::from(*c));
-        Row::new(cells).height(height as u16) //.bottom_margin(1)
+        Row::new(cells).height(height as u16).style(default_style) //.bottom_margin(1)
     });
     let t = Table::new(
         rows,
@@ -130,8 +133,9 @@ fn ui(f: &mut Frame, app: &mut App) {
         ],
     )
     // .header(header)
-    .block(Block::default().borders(Borders::ALL).title("Table"))
-    .highlight_style(selected_style)
-    .highlight_symbol("-> ");
+    .block(
+        Block::default().borders(Borders::ALL).title("Jobs"), //.style(Style::default().bg(Color::Rgb(25, 26, 25))),
+    )
+    .highlight_style(selected_style);
     f.render_stateful_widget(t, rects[0], &mut app.state);
 }
