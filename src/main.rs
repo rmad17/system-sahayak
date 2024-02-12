@@ -1,4 +1,3 @@
-use std::process::Command;
 use std::{error::Error, io};
 
 use crossterm::{
@@ -48,26 +47,6 @@ impl<'a> App<'a> {
         };
         self.state.select(Some(i));
     }
-    pub fn select(&mut self) {
-        let output = if cfg!(target_os = "windows") {
-            print!("A");
-            Command::new("cmd")
-                .args(["/C", "echo hello"])
-                .output()
-                .expect("failed to execute process")
-        } else {
-            print!("B");
-            Command::new("sh")
-                .output()
-                .expect("failed to execute process")
-        };
-        let output = Command::new("pwd")
-            .output()
-            .expect("failed to execute process");
-        let hello = output.stdout;
-        // print!("{}", _hello);
-        println!("{:?}", hello);
-    }
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -105,7 +84,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
             if key.kind == KeyEventKind::Press {
                 match key.code {
                     KeyCode::Char('q') => return Ok(()),
-                    KeyCode::Enter => app.select(),
+                    KeyCode::Enter => return select(terminal, app),
                     KeyCode::Down | KeyCode::Char('j') => app.next(),
                     KeyCode::Up | KeyCode::Char('k') => app.previous(),
                     _ => {}
@@ -160,4 +139,58 @@ fn ui(f: &mut Frame, app: &mut App) {
     )
     .highlight_style(selected_style);
     f.render_stateful_widget(t, rects[0], &mut app.state);
+}
+
+fn popup(f: &mut Frame, app: &App) {
+    let size = f.size();
+
+    let chunks = Layout::default()
+        .constraints([Constraint::Percentage(20), Constraint::Percentage(80)])
+        .split(size);
+
+    // let text = if app.show_popup {
+    //     "Press p to close the popup"
+    // } else {
+    //     "Press p to show the popup"
+    // };
+    let text = "Press p to show popup";
+    let paragraph = Paragraph::new(text.slow_blink())
+        .alignment(Alignment::Center)
+        .wrap(Wrap { trim: true });
+    f.render_widget(paragraph, chunks[0]);
+
+    let block = Block::default()
+        .title("Content")
+        .borders(Borders::ALL)
+        .on_blue();
+    f.render_widget(block, chunks[1]);
+
+    let block = Block::default().title("Popup").borders(Borders::ALL);
+    let area = centered_rect(60, 20, size);
+    f.render_widget(Clear, area); //this clears out the background
+    f.render_widget(block, area);
+}
+fn select<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
+    loop {
+        terminal.draw(|f| popup(f, &app))?;
+    }
+}
+fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+    let popup_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Percentage((100 - percent_y) / 2),
+            Constraint::Percentage(percent_y),
+            Constraint::Percentage((100 - percent_y) / 2),
+        ])
+        .split(r);
+
+    Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Percentage((100 - percent_x) / 2),
+            Constraint::Percentage(percent_x),
+            Constraint::Percentage((100 - percent_x) / 2),
+        ])
+        .split(popup_layout[1])[1]
 }
