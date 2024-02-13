@@ -106,15 +106,6 @@ fn ui(f: &mut Frame, app: &mut App) {
     let selected_style = Style::default()
         .bg(Color::Rgb(252, 138, 25))
         .fg(Color::Black);
-    // .add_modifier(Modifier::REVERSED);
-    // let normal_style = Style::default().bg(Color::Rgb(252, 138, 25));
-    // let header_cells = ["Header1", "Header2", "Header3"]
-    //     .iter()
-    //     .map(|h| Cell::from(*h).style(Style::default().fg(Color::Black)));
-    // let header = Row::new(header_cells)
-    //     .style(normal_style)
-    //     .height(1)
-    //     .bottom_margin(1);
     let rows = app.items.iter().map(|item| {
         let height = item
             .iter()
@@ -148,11 +139,6 @@ fn popup(f: &mut Frame, app: &App) {
         .constraints([Constraint::Percentage(20), Constraint::Percentage(80)])
         .split(size);
 
-    // let text = if app.show_popup {
-    //     "Press p to close the popup"
-    // } else {
-    //     "Press p to show the popup"
-    // };
     let text = "Press p to show popup";
     let paragraph = Paragraph::new(text.slow_blink())
         .alignment(Alignment::Center)
@@ -173,6 +159,14 @@ fn popup(f: &mut Frame, app: &App) {
 fn select<B: Backend>(terminal: &mut Terminal<B>, app: App) -> io::Result<()> {
     loop {
         terminal.draw(|f| popup(f, &app))?;
+        if let Event::Key(key) = event::read()? {
+            if key.kind == KeyEventKind::Press {
+                match key.code {
+                    KeyCode::Char('q') => return Ok(()),
+                    _ => {}
+                }
+            }
+        }
     }
 }
 fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
