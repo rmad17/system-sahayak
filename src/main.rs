@@ -170,7 +170,7 @@ fn popup(f: &mut Frame, app: &App) {
     f.render_widget(Clear, area); //this clears out the background
     f.render_widget(block, area);
 }
-fn select<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
+fn select<B: Backend>(terminal: &mut Terminal<B>, app: App) -> io::Result<()> {
     loop {
         terminal.draw(|f| popup(f, &app))?;
     }
