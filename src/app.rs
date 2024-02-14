@@ -1,22 +1,16 @@
+use ratatui::widgets::TableState;
 
-use anyhow::{Context, Result};
-
-
-struct App {
-    state: TableState,
-    items: Vec<Vec<&'a str>>,
+pub struct App<'a> {
+    pub state: TableState,
+    pub items: Vec<Vec<&'a str>>,
 }
 
-impl App {
-    fn new() -> Result<Self> {
-        Ok(Self {
+impl<'a> App<'a> {
+    pub fn new() -> App<'a> {
+        App {
             state: TableState::default(),
-            items: vec![
-                vec!["system"],
-                vec!["vim"],
-                vec!["omz"],
-            ],
-        })
+            items: vec![vec!["system"], vec!["vim"], vec!["omz"]],
+        }
     }
     pub fn next(&mut self) {
         let i = match self.state.selected() {
