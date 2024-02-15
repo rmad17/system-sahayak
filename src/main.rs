@@ -1,3 +1,5 @@
+use std::process::Command;
+use std::process::Stdio;
 use std::{error::Error, io};
 
 use crossterm::{
@@ -40,7 +42,20 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
-    start_tui(terminal, app);
+    loop {
+        terminal.draw(|f| ui(f, &mut app))?;
+        if let Event::Key(key) = event::read()? {
+            if key.kind == KeyEventKind::Press {
+                match key.code {
+                    KeyCode::Char('q') => return Ok(()),
+                    KeyCode::Enter => return select(terminal, app),
+                    KeyCode::Down | KeyCode::Char('j') => app.next(),
+                    KeyCode::Up | KeyCode::Char('k') => app.previous(),
+                    _ => {}
+                }
+            }
+        }
+    }
 }
 
 fn ui(f: &mut Frame, app: &mut App) {
@@ -88,12 +103,6 @@ fn popup(f: &mut Frame, app: &App) {
         .constraints([Constraint::Percentage(20), Constraint::Percentage(80)])
         .split(size);
 
-    let text = "Press p to show popup";
-    let paragraph = Paragraph::new(text.slow_blink())
-        .alignment(Alignment::Center)
-        .wrap(Wrap { trim: true });
-    f.render_widget(paragraph, chunks[0]);
-
     let block = Block::default()
         .title("Content")
         .borders(Borders::ALL)
@@ -106,6 +115,14 @@ fn popup(f: &mut Frame, app: &App) {
     f.render_widget(block, area);
 }
 fn select<B: Backend>(terminal: &mut Terminal<B>, app: App) -> io::Result<()> {
+    let child = Command::new("bash")
+        .args(["-c", "omz update"])
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("Failed to run omz update");
+    let output = child.wait_with_output().expect("failed to wait on child");
+    // Stream output.
+    println!("Status: {}", output.status);
     loop {
         terminal.draw(|f| popup(f, &app))?;
         if let Event::Key(key) = event::read()? {
