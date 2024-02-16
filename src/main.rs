@@ -48,7 +48,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
             if key.kind == KeyEventKind::Press {
                 match key.code {
                     KeyCode::Char('q') => return Ok(()),
-                    KeyCode::Enter => return select(terminal, app),
+                    KeyCode::Enter => app.show_popup = !app.show_popup,
                     KeyCode::Down | KeyCode::Char('j') => app.next(),
                     KeyCode::Up | KeyCode::Char('k') => app.previous(),
                     _ => {}
@@ -59,9 +59,15 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
 }
 
 fn ui(f: &mut Frame, app: &mut App) {
+    let text = if app.show_popup {
+        "Press p to close the popup"
+    } else {
+        "Press p to show the popup"
+    };
+    let size = f.size();
     let rects = Layout::default()
         .constraints([Constraint::Percentage(100)])
-        .split(f.size());
+        .split(size);
 
     let default_style = Style::default()
         .bg(Color::Rgb(246, 250, 142))
@@ -94,47 +100,54 @@ fn ui(f: &mut Frame, app: &mut App) {
     )
     .highlight_style(selected_style);
     f.render_stateful_widget(t, rects[0], &mut app.state);
-}
 
-fn popup(f: &mut Frame, app: &App) {
-    let size = f.size();
-
-    let chunks = Layout::default()
-        .constraints([Constraint::Percentage(20), Constraint::Percentage(80)])
-        .split(size);
-
-    let block = Block::default()
-        .title("Content")
-        .borders(Borders::ALL)
-        .on_blue();
-    f.render_widget(block, chunks[1]);
-
-    let block = Block::default().title("Popup").borders(Borders::ALL);
-    let area = centered_rect(60, 20, size);
-    f.render_widget(Clear, area); //this clears out the background
-    f.render_widget(block, area);
-}
-fn select<B: Backend>(terminal: &mut Terminal<B>, app: App) -> io::Result<()> {
-    let child = Command::new("bash")
-        .args(["-c", "omz update"])
-        .stdout(Stdio::piped())
-        .spawn()
-        .expect("Failed to run omz update");
-    let output = child.wait_with_output().expect("failed to wait on child");
-    // Stream output.
-    println!("Status: {}", output.status);
-    loop {
-        terminal.draw(|f| popup(f, &app))?;
-        if let Event::Key(key) = event::read()? {
-            if key.kind == KeyEventKind::Press {
-                match key.code {
-                    KeyCode::Char('q') => return Ok(()),
-                    _ => {}
-                }
-            }
-        }
+    if app.show_popup {
+        let block = Block::default().title("Popup").borders(Borders::ALL);
+        let area = centered_rect(60, 20, size);
+        f.render_widget(Clear, area); //this clears out the background
+        f.render_widget(block, area);
     }
 }
+
+// fn popup(f: &mut Frame, app: &App) {
+//     let size = f.size();
+
+//     // let chunks = Layout::default()
+//     //     .constraints([Constraint::Percentage(40), Constraint::Percentage(50)])
+//     //     .split(size);
+
+//     // let block = Block::default()
+//     //     .title("Content")
+//     //     .borders(Borders::ALL)
+//     //     .on_blue();
+//     // f.render_widget(block, chunks[1]);
+
+//     let block = Block::default().title("Popup").borders(Borders::ALL);
+//     let area = centered_rect(60, 20, size);
+//     f.render_widget(Clear, area); //this clears out the background
+//     f.render_widget(block, area);
+// }
+// fn select<B: Backend>(terminal: &mut Terminal<B>, app: App) -> io::Result<()> {
+//     let child = Command::new("bash")
+//         .args(["-c", "omz update"])
+//         .stdout(Stdio::piped())
+//         .spawn()
+//         .expect("Failed to run omz update");
+//     let output = child.wait_with_output().expect("failed to wait on child");
+//     // Stream output.
+//     println!("Status: {}", output.status);
+//     loop {
+//         terminal.draw(|f| popup(f, &app))?;
+//         if let Event::Key(key) = event::read()? {
+//             if key.kind == KeyEventKind::Press {
+//                 match key.code {
+//                     KeyCode::Char('q') => return Ok(()),
+//                     _ => {}
+//                 }
+//             }
+//         }
+//     }
+// }
 fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
     let popup_layout = Layout::default()
         .direction(Direction::Vertical)

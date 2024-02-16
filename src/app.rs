@@ -3,6 +3,7 @@ use ratatui::widgets::TableState;
 pub struct App<'a> {
     pub state: TableState,
     pub items: Vec<Vec<&'a str>>,
+    pub show_popup: bool,
 }
 
 impl<'a> App<'a> {
@@ -10,6 +11,7 @@ impl<'a> App<'a> {
         App {
             state: TableState::default(),
             items: vec![vec!["system"], vec!["vim"], vec!["omz"]],
+            show_popup: false,
         }
     }
     pub fn next(&mut self) {
