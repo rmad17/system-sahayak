@@ -59,11 +59,6 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
 }
 
 fn ui(f: &mut Frame, app: &mut App) {
-    let text = if app.show_popup {
-        "Press p to close the popup"
-    } else {
-        "Press p to show the popup"
-    };
     let size = f.size();
     let rects = Layout::default()
         .constraints([Constraint::Percentage(100)])
@@ -73,37 +68,35 @@ fn ui(f: &mut Frame, app: &mut App) {
         .bg(Color::Rgb(246, 250, 142))
         .fg(Color::Black);
 
+    let popup_style = Style::default().bg(Color::Rgb(3, 46, 64)).fg(Color::White);
+
     let selected_style = Style::default()
         .bg(Color::Rgb(252, 138, 25))
         .fg(Color::Black);
-    let rows = app.items.iter().map(|item| {
-        let height = item
-            .iter()
-            .map(|content| content.chars().filter(|c| *c == '\n').count())
-            .max()
-            .unwrap_or(0)
-            + 1;
-        let cells = item.iter().map(|c| Cell::from(*c));
-        Row::new(cells).height(height as u16).style(default_style) //.bottom_margin(1)
-    });
-    let t = Table::new(
-        rows,
-        [
-            Constraint::Percentage(50),
-            Constraint::Max(30),
-            Constraint::Min(10),
-        ],
-    )
-    // .header(header)
-    .block(
-        Block::default().borders(Borders::ALL).title("Jobs"), //.style(Style::default().bg(Color::Rgb(25, 26, 25))),
-    )
-    .highlight_style(selected_style);
-    f.render_stateful_widget(t, rects[0], &mut app.state);
+    // let rows = app.items.iter().map(|item| {
+    //     let height = item
+    //         .iter()
+    //         .map(|content| content.chars().filter(|c| *c == '\n').count())
+    //         .max()
+    //         .unwrap_or(0)
+    //         + 1;
+    //     let cells = item.iter().map(|c| Cell::from(*c));
+    //     Row::new(cells).height(height as u16).style(default_style) //.bottom_margin(1)
+    // });
+    let list = List::new(app.items)
+        // .header(header)
+        .block(
+            Block::default().borders(Borders::ALL).title("Jobs"), //.style(Style::default().bg(Color::Rgb(25, 26, 25))),
+        )
+        .highlight_style(selected_style);
+    f.render_stateful_widget(list, rects[0], &mut app.state);
 
     if app.show_popup {
-        let block = Block::default().title("Popup").borders(Borders::ALL);
-        let area = centered_rect(60, 20, size);
+        let block = Block::default()
+            .title("Running task: Command")
+            .borders(Borders::ALL)
+            .style(popup_style);
+        let area = centered_rect(70, 50, size);
         f.render_widget(Clear, area); //this clears out the background
         f.render_widget(block, area);
     }

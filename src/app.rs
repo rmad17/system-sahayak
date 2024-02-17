@@ -1,16 +1,16 @@
-use ratatui::widgets::TableState;
+use ratatui::widgets::ListState;
 
 pub struct App<'a> {
-    pub state: TableState,
-    pub items: Vec<Vec<&'a str>>,
+    pub state: ListState,
+    pub items: Vec<&'a str>,
     pub show_popup: bool,
 }
 
 impl<'a> App<'a> {
     pub fn new() -> App<'a> {
         App {
-            state: TableState::default(),
-            items: vec![vec!["system"], vec!["vim"], vec!["omz"]],
+            state: ListState::default(),
+            items: vec!["system", "vim", "omz"],
             show_popup: false,
         }
     }
