@@ -1,8 +1,9 @@
+use ratatui::widgets::ListItem;
 use ratatui::widgets::ListState;
 
 pub struct App<'a> {
     pub state: ListState,
-    pub items: Vec<&'a str>,
+    pub items: Vec<ListItem>,
     pub show_popup: bool,
 }
 
