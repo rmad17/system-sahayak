@@ -43,7 +43,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
     loop {
-        terminal.draw(|f| ui(f, &mut app))?;
+        terminal.draw(|f| draw_ui(f, &mut app))?;
         if let Event::Key(key) = event::read()? {
             if key.kind == KeyEventKind::Press {
                 match key.code {
@@ -58,7 +58,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
     }
 }
 
-fn ui(f: &mut Frame, app: &mut App) {
+fn draw_ui(f: &mut Frame, app: &mut App) {
     let size = f.size();
     let rects = Layout::default()
         .constraints([Constraint::Percentage(100)])
@@ -101,6 +101,8 @@ fn ui(f: &mut Frame, app: &mut App) {
         f.render_widget(block, area);
     }
 }
+
+fn draw_text() {}
 
 fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
     let popup_layout = Layout::default()
